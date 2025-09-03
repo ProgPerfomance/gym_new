@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 
 // Helper: basic RU phone validation: +7XXXXXXXXXX or 8XXXXXXXXXX
 const isValidRuPhone = (v) =>
-    /^(\+7|8)\d{10}$/.test((v || "").replace(/\s|\(|\)|-/g, ""));
+   true;
 
 const emptyApplicant = {
   tournamentName: "",
@@ -72,7 +72,7 @@ export default function TournamentApplicationPage() {
 
     setSubmitting(true);
     try {
-      const apiBase = "http://localhost:2017"
+      const apiBase = "https://mvpgarage.one:2017"
       const payload = {
         ...form,
         phone: form.phone.replace(/\s|\(|\)|-/g, ""),
@@ -145,7 +145,6 @@ export default function TournamentApplicationPage() {
                 </Field>
                 <Field label="Телефон (Россия)" hint="Формат: +7XXXXXXXXXX или 8XXXXXXXXXX" required>
                   <input
-                      type="tel"
                       value={form.phone}
                       onChange={(e) => onChangeForm("phone", e.target.value.replace(/\s/g, ""))}
                       placeholder="+7XXXXXXXXXX"
