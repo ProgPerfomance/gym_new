@@ -1,0 +1,30 @@
+.tableWrap {
+    margin-top: 12px;
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.table th,
+.table td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+.table thead th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.empty {
+    margin-top: 8px;
+    color: #6b7280;
+    font-size: 14px;
+}

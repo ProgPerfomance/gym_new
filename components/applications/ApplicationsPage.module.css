@@ -1,0 +1,45 @@
+.page {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.topbar {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.state {
+    padding: 24px;
+    color: #6b7280;
+}
+
+.error {
+    padding: 16px;
+    color: #b91c1c;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 900px) {
+    .grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
