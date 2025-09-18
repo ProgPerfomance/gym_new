@@ -126,7 +126,7 @@ export default function TournamentApplicationPage() {
                       type="text"
                       value={form.streamName}
                       onChange={(e) => onChangeForm("streamName", e.target.value)}
-                      placeholder="Например: Девочки 2012–2013"
+                      placeholder="16.05.2025"
                   />
                 </Field>
               </div>
