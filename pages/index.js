@@ -121,7 +121,7 @@ export default function TournamentApplicationPage() {
                       placeholder="Например: Кубок города 2025"
                   />
                 </Field>
-                <Field label="Название потока" required>
+                <Field label="Дата турнира" required>
                   <input
                       type="text"
                       value={form.streamName}
