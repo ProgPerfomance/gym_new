@@ -123,6 +123,7 @@ const TournamentPage = () => {
                     <th>Дата рождения</th>
                     <th>Поток</th>
                     <th>Школа</th>
+                    <th>Год</th>
                     <th>Тренер</th>
                     <th>Город</th>
                     <th>Предмет</th>
