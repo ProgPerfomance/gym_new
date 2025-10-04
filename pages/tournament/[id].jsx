@@ -165,6 +165,9 @@ const TournamentPage = () => {
                                 />
                             </td>
                             <td>
+                                <p>{p.year ?? ""}</p>
+                            </td>
+                            <td>
                                 <input
                                     value={p.mentor}
                                     onChange={(e) => handleChange(p.id, 'mentor', e.target.value)}
