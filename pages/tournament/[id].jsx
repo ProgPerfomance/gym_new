@@ -40,6 +40,7 @@ const TournamentPage = () => {
                     school: p.school || '',
                     mentor: p.mentor || '',
                     city: p.city || '',
+                    year: p.year || '',
                     apparatus: p.apparatus || APPARATUSES[0],
                     grades: p.grades || JUDGES.reduce((acc, j) => ({ ...acc, [j]: null }), {}),
                 }));
