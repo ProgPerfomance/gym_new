@@ -6,34 +6,23 @@ import styles from "./tournament.module.css";
 
 const API = "https://mvpgarage.one:2017";
 
-const APPARATUSES = [
-    "Булавы",
-    "Обруч",
-    "Без предмета",
-    "Лента",
-    "Скакалка",
-    "Мяч",
-];
-
-const JUDGES = [
-    "ДВ-1", "ДВ-2", "ДА-1", "ДА-2",
-    "А-1", "А-2", "А-3", "А-4",
-    "Е-1", "Е-2", "Е-3", "Е-4",
+const APPARATUSES = ["Булавы", "Обруч", "Без предмета", "Лента", "Скакалка", "Мяч"];
+const JUDGE_GROUPS = [
+    { title: "Бригада ДВ", list: ["ДВ-1", "ДВ-2"] },
+    { title: "Бригада ДА", list: ["ДА-1", "ДА-2"] },
+    { title: "Бригада А", list: ["А-1", "А-2", "А-3", "А-4"] },
+    { title: "Бригада Е", list: ["Е-1", "Е-2", "Е-3", "Е-4"] },
 ];
 
 const TournamentPage = () => {
     const router = useRouter();
     const { id } = router.query;
-
     const [participants, setParticipants] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // ============================
-    // 📦 Загрузка участников
-    // ============================
     useEffect(() => {
         if (!id) return;
-        const load = async () => {
+        (async () => {
             try {
                 const res = await axios.get(`${API}/tournaments/${id}/participants`);
                 const data = res.data.map((p) => ({
@@ -47,22 +36,19 @@ const TournamentPage = () => {
                     apparatus: p.apparatus || APPARATUSES[0],
                     grades:
                         p.grades ||
-                        JUDGES.reduce((acc, j) => ({ ...acc, [j]: null }), {}),
+                        JUDGE_GROUPS.flatMap((g) => g.list).reduce((acc, j) => ({ ...acc, [j]: null }), {}),
+                    isNew: false,
                 }));
                 setParticipants(data);
-            } catch (err) {
-                console.error("Ошибка загрузки:", err);
+            } catch (e) {
+                console.error(e);
             } finally {
                 setLoading(false);
             }
-        };
-        load();
+        })();
     }, [id]);
 
-    // ============================
-    // ➕ Добавить участника
-    // ============================
-    const handleAdd = () => {
+    const handleAdd = () =>
         setParticipants((prev) => [
             ...prev,
             {
@@ -74,24 +60,14 @@ const TournamentPage = () => {
                 mentor: "",
                 city: "",
                 apparatus: APPARATUSES[0],
-                grades: JUDGES.reduce((acc, j) => ({ ...acc, [j]: null }), {}),
+                grades: JUDGE_GROUPS.flatMap((g) => g.list).reduce((acc, j) => ({ ...acc, [j]: null }), {}),
                 isNew: true,
             },
         ]);
-    };
 
-    // ============================
-    // ✏️ Изменение значения поля
-    // ============================
-    const handleChange = (pid, field, value) => {
-        setParticipants((prev) =>
-            prev.map((p) => (p.id === pid ? { ...p, [field]: value } : p))
-        );
-    };
+    const handleChange = (pid, field, value) =>
+        setParticipants((prev) => prev.map((p) => (p.id === pid ? { ...p, [field]: value } : p)));
 
-    // ============================
-    // 💾 Сохранить изменения одного участника
-    // ============================
     const handleSaveOne = async (p) => {
         const payload = {
             name: p.name,
@@ -103,33 +79,78 @@ const TournamentPage = () => {
             apparatus: p.apparatus,
             grades: p.grades,
         };
-
         try {
-            if (p.isNew || String(p.id).startsWith("temp_")) {
+            if (p.isNew || String(p.id).startsWith("temp_"))
                 await axios.post(`${API}/tournaments/${id}/participants/add`, payload);
-            } else {
-                await axios.put(`${API}/tournaments/participants/${p.id}`, payload);
-            }
+            else await axios.put(`${API}/tournaments/participants/${p.id}`, payload);
             alert("Сохранено");
-        } catch (err) {
-            console.error("Ошибка сохранения:", err);
-            alert("Ошибка при сохранении");
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка сохранения");
         }
     };
 
-    // ============================
-    // 🗑 Удалить участника
-    // ============================
     const handleDelete = async (pid) => {
-        // if (!confirm("Удалить участника?")) return;
-
         try {
-                await axios.delete(`${API}/tournaments/participants/${pid}`);
+            await axios.delete(`${API}/tournaments/participants/${pid}`);
             setParticipants((prev) => prev.filter((p) => p.id !== pid));
-        } catch (err) {
-            console.error("Ошибка удаления:", err);
-            alert("Ошибка при удалении");
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка удаления");
         }
+    };
+
+    const handleSaveAll = async () => {
+        try {
+            for (const p of participants) {
+                const payload = {
+                    name: p.name,
+                    date_of_birth: p.date_of_birth,
+                    thread: p.thread,
+                    school: p.school,
+                    mentor: p.mentor,
+                    city: p.city,
+                    apparatus: p.apparatus,
+                    grades: p.grades,
+                };
+                if (p.isNew || String(p.id).startsWith("temp_"))
+                    await axios.post(`${API}/tournaments/${id}/participants/add`, payload);
+                else await axios.put(`${API}/tournaments/participants/${p.id}`, payload);
+            }
+            alert("Все изменения сохранены");
+            router.reload();
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка сохранения всех участников");
+        }
+    };
+
+    const calculateTotals = (grades) => {
+        const safe = (n) => (typeof n === "number" && !isNaN(n) ? n : null);
+        const dw = safe(grades["ДВ-1"]),
+            dw2 = safe(grades["ДВ-2"]),
+            da1 = safe(grades["ДА-1"]),
+            da2 = safe(grades["ДА-2"]);
+
+        const DВ = dw !== null && dw2 !== null ? (dw + dw2) / 2 : null;
+        const DА = da1 !== null && da2 !== null ? (da1 + da2) / 2 : null;
+        const D = DВ !== null && DА !== null ? (DВ + DА) / 2 : null;
+
+        const calcArt = (arr) => {
+            if (arr.length < 4) return null;
+            const sorted = [...arr].sort((a, b) => a - b);
+            const avg = (sorted[1] + sorted[2]) / 2;
+            return +(10 - avg).toFixed(2);
+        };
+
+        const getVals = (keys) => keys.map((k) => safe(grades[k])).filter((v) => v !== null);
+        const A = calcArt(getVals(["А-1", "А-2", "А-3", "А-4"]));
+        const E = calcArt(getVals(["Е-1", "Е-2", "Е-3", "Е-4"]));
+
+        const total =
+            D !== null && A !== null && E !== null ? +(D + A + E).toFixed(3) : null;
+
+        return { DВ, DА, D, A, E, total };
     };
 
     if (loading) return <div className={styles.container}>Загрузка...</div>;
@@ -152,156 +173,70 @@ const TournamentPage = () => {
                 </tr>
                 </thead>
                 <tbody>
-                {participants.map((p) => (
-                    <React.Fragment key={p.id}>
-                        <tr>
-                            <td>
-                                <input
-                                    value={p.name}
-                                    onChange={(e) => handleChange(p.id, "name", e.target.value)}
-                                    className={styles.inputWide}
-                                />
-                            </td>
-                            <td>
-                                <input
-                                    type="date"
-                                    value={p.date_of_birth}
-                                    onChange={(e) =>
-                                        handleChange(p.id, "date_of_birth", e.target.value)
-                                    }
-                                    className={styles.input}
-                                />
-                            </td>
-                            <td>
-                                <input
-                                    value={p.thread}
-                                    onChange={(e) =>
-                                        handleChange(p.id, "thread", e.target.value)
-                                    }
-                                    className={styles.input}
-                                />
-                            </td>
-                            <td>
-                                <input
-                                    value={p.school}
-                                    onChange={(e) =>
-                                        handleChange(p.id, "school", e.target.value)
-                                    }
-                                    className={styles.inputWide}
-                                />
-                            </td>
-                            <td>
-                                <input
-                                    value={p.mentor}
-                                    onChange={(e) =>
-                                        handleChange(p.id, "mentor", e.target.value)
-                                    }
-                                    className={styles.inputWide}
-                                />
-                            </td>
-                            <td>
-                                <input
-                                    value={p.city}
-                                    onChange={(e) =>
-                                        handleChange(p.id, "city", e.target.value)
-                                    }
-                                    className={styles.inputWide}
-                                />
-                            </td>
-                            <td>
-                                <select
-                                    value={p.apparatus}
-                                    onChange={(e) =>
-                                        handleChange(p.id, "apparatus", e.target.value)
-                                    }
-                                    className={styles.input}
-                                >
-                                    {APPARATUSES.map((a) => (
-                                        <option key={a}>{a}</option>
-                                    ))}
-                                </select>
-                            </td>
-                            <td>
-                                <button
-                                    className={styles.saveOne}
-                                    onClick={() => handleSaveOne(p)}
-                                >
-                                    💾
-                                </button>
-                            </td>
-                            <td>
-                                <button
-                                    className={styles.delete}
-                                    onClick={() => handleDelete(p.id)}
-                                >
-                                    ✕
-                                </button>
-                            </td>
-                        </tr>
+                {participants.map((p) => {
+                    const totals = calculateTotals(p.grades);
+                    return (
+                        <React.Fragment key={p.id}>
+                            <tr>
+                                <td><input value={p.name} onChange={(e)=>handleChange(p.id,"name",e.target.value)} className={styles.inputWide}/></td>
+                                <td><input type="date" value={p.date_of_birth} onChange={(e)=>handleChange(p.id,"date_of_birth",e.target.value)} className={styles.input}/></td>
+                                <td><input value={p.thread} onChange={(e)=>handleChange(p.id,"thread",e.target.value)} className={styles.input}/></td>
+                                <td><input value={p.school} onChange={(e)=>handleChange(p.id,"school",e.target.value)} className={styles.inputWide}/></td>
+                                <td><input value={p.mentor} onChange={(e)=>handleChange(p.id,"mentor",e.target.value)} className={styles.inputWide}/></td>
+                                <td><input value={p.city} onChange={(e)=>handleChange(p.id,"city",e.target.value)} className={styles.inputWide}/></td>
+                                <td>
+                                    <select value={p.apparatus} onChange={(e)=>handleChange(p.id,"apparatus",e.target.value)} className={styles.input}>
+                                        {APPARATUSES.map((a)=><option key={a}>{a}</option>)}
+                                    </select>
+                                </td>
+                                <td><button className={styles.saveOne} onClick={()=>handleSaveOne(p)}>💾</button></td>
+                                <td><button className={styles.delete} onClick={()=>handleDelete(p.id)}>✕</button></td>
+                            </tr>
 
-                        <tr>
-                            <td colSpan={9} className={styles.gradesRow}>
-                                <div className={styles.gradesContainer}>
-                                    {JUDGES.map((j) => (
-                                        <div key={j} className={styles.gradeItem}>
-                                            <span className={styles.judge}>{j}:</span>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                value={p.grades[j] ?? ""}
-                                                onChange={(e) =>
-                                                    handleChange(p.id, "grades", {
-                                                        ...p.grades,
-                                                        [j]:
-                                                            e.target.value === ""
-                                                                ? null
-                                                                : parseFloat(e.target.value),
-                                                    })
-                                                }
-                                                className={styles.scoreInput}
-                                            />
+                            <tr>
+                                <td colSpan={9} className={styles.gradesRow}>
+                                    <div className={styles.gradeGroups}>
+                                        {JUDGE_GROUPS.map((g)=>(
+                                            <div key={g.title} className={styles.groupBlock}>
+                                                <h4 className={styles.groupTitle}>{g.title}</h4>
+                                                <div className={styles.groupContent}>
+                                                    {g.list.map((j)=>(
+                                                        <div key={j} className={styles.gradeItem}>
+                                                            <span className={styles.judge}>{j}:</span>
+                                                            <input type="number" step="0.1"
+                                                                   value={p.grades[j] ?? ""}
+                                                                   onChange={(e)=>
+                                                                       handleChange(p.id,"grades",{...p.grades,[j]:e.target.value===""?null:parseFloat(e.target.value)})
+                                                                   }
+                                                                   className={styles.scoreInput}/>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className={styles.resultBlock}>
+                                        <div className={styles.resultRow}>
+                                            <p><b>DВ:</b> {totals.DВ ?? "—"}</p>
+                                            <p><b>DА:</b> {totals.DА ?? "—"}</p>
+                                            <p><b>D:</b> {totals.D ?? "—"}</p>
+                                            <p><b>A:</b> {totals.A ?? "—"}</p>
+                                            <p><b>E:</b> {totals.E ?? "—"}</p>
+                                            <p className={styles.total}><b>Итого:</b> {totals.total ?? "—"}</p>
                                         </div>
-                                    ))}
-                                </div>
-                            </td>
-                        </tr>
-                    </React.Fragment>
-                ))}
+                                    </div>
+                                </td>
+                            </tr>
+                        </React.Fragment>
+                    );
+                })}
                 </tbody>
             </table>
-            <div className={styles.actions}>
-                <button className={styles.add} onClick={handleAdd}>
-                    Добавить участника
-                </button>
-                <button className={styles.saveAll} onClick={async () => {
-                    try {
-                        for (const p of participants) {
-                            const payload = {
-                                name: p.name,
-                                date_of_birth: p.date_of_birth,
-                                thread: p.thread,
-                                school: p.school,
-                                mentor: p.mentor,
-                                city: p.city,
-                                apparatus: p.apparatus,
-                                grades: p.grades,
-                            };
 
-                            if (p.isNew || String(p.id).startsWith("temp_")) {
-                                await axios.post(`${API}/tournaments/${id}/participants/add`, payload);
-                            } else {
-                                await axios.put(`${API}/tournaments/participants/${p.id}`, payload);
-                            }
-                        }
-                        alert("Все изменения сохранены");
-                        router.reload();
-                    } catch (err) {
-                        console.error("Ошибка при сохранении всех:", err);
-                        alert("Ошибка при сохранении всех участников");
-                    }
-                }}>
-                    💾 Сохранить всех
-                </button>
+            <div className={styles.actions}>
+                <button className={styles.add} onClick={handleAdd}>Добавить участника</button>
+                <button className={styles.saveAll} onClick={handleSaveAll}>💾 Сохранить всех</button>
             </div>
         </div>
     );
