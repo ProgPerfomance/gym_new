@@ -86,6 +86,7 @@
 .gradesRow {
     background: #f9fafb;
     border-top: none;
+
 }
 
 .gradesContainer {
@@ -108,4 +109,56 @@
 
 .score {
     color: #111827;
+}
+
+.gradesRow {
+    background: #f9fafb;
+    border-top: none;
+    padding: 8px 0;
+}
+
+.gradesLine {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 8px;
+}
+
+.gradeColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+    text-align: center;
+}
+
+.columnTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.scoreInput {
+    width: 55px;
+    text-align: center;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 4px;
+    font-size: 13px;
+    color: #111827;
+}
+
+.scoreValue {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
+}
+
+.total {
+    color: #10b981;
+    font-weight: 600;
 }

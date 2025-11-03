@@ -122,7 +122,7 @@ const JudgePage = () => {
                                     className={styles.item}
                                 >
                                     <div className={styles.participantRow}>
-                                        <span>{p.name} — {p.city}</span>
+                                        <span>{p.name} — {p.city} {p.apparatus}<br/></span>
                                         <span className={styles.myScore}>
                       Ваша оценка: {currentScore}
                     </span>

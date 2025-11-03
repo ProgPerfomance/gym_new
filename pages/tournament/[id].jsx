@@ -192,38 +192,55 @@ const TournamentPage = () => {
                                 <td><button className={styles.saveOne} onClick={()=>handleSaveOne(p)}>💾</button></td>
                                 <td><button className={styles.delete} onClick={()=>handleDelete(p.id)}>✕</button></td>
                             </tr>
-
                             <tr>
                                 <td colSpan={9} className={styles.gradesRow}>
-                                    <div className={styles.gradeGroups}>
-                                        {JUDGE_GROUPS.map((g)=>(
-                                            <div key={g.title} className={styles.groupBlock}>
-                                                <h4 className={styles.groupTitle}>{g.title}</h4>
-                                                <div className={styles.groupContent}>
-                                                    {g.list.map((j)=>(
-                                                        <div key={j} className={styles.gradeItem}>
-                                                            <span className={styles.judge}>{j}:</span>
-                                                            <input type="number" step="0.1"
-                                                                   value={p.grades[j] ?? ""}
-                                                                   onChange={(e)=>
-                                                                       handleChange(p.id,"grades",{...p.grades,[j]:e.target.value===""?null:parseFloat(e.target.value)})
-                                                                   }
-                                                                   className={styles.scoreInput}/>
-                                                        </div>
-                                                    ))}
+                                    <div className={styles.gradesLine}>
+                                        {JUDGE_GROUPS.flatMap((g) =>
+                                            g.list.map((j) => (
+                                                <div key={j} className={styles.gradeColumn}>
+                                                    <h4 className={styles.columnTitle}>{j}</h4>
+                                                    <input
+                                                        type="number"
+                                                        step="0.1"
+                                                        value={p.grades[j] ?? ""}
+                                                        onChange={(e) =>
+                                                            handleChange(p.id, "grades", {
+                                                                ...p.grades,
+                                                                [j]:
+                                                                    e.target.value === "" ? null : parseFloat(e.target.value),
+                                                            })
+                                                        }
+                                                        className={styles.scoreInput}
+                                                    />
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                            ))
+                                        )}
 
-                                    <div className={styles.resultBlock}>
-                                        <div className={styles.resultRow}>
-                                            <p><b>DВ:</b> {totals.DВ ?? "—"}</p>
-                                            <p><b>DА:</b> {totals.DА ?? "—"}</p>
-                                            <p><b>D:</b> {totals.D ?? "—"}</p>
-                                            <p><b>A:</b> {totals.A ?? "—"}</p>
-                                            <p><b>E:</b> {totals.E ?? "—"}</p>
-                                            <p className={styles.total}><b>Итого:</b> {totals.total ?? "—"}</p>
+                                        <div className={styles.gradeColumn}>
+                                            <h4 className={styles.columnTitle}>ДВ</h4>
+                                            <p className={styles.scoreValue}>{totals.ДВ ?? "—"}</p>
+                                        </div>
+                                        <div className={styles.gradeColumn}>
+                                            <h4 className={styles.columnTitle}>ДА</h4>
+                                            <p className={styles.scoreValue}>{totals.ДА ?? "—"}</p>
+                                        </div>
+                                        <div className={styles.gradeColumn}>
+                                            <h4 className={styles.columnTitle}>D</h4>
+                                            <p className={styles.scoreValue}>{totals.D ?? "—"}</p>
+                                        </div>
+                                        <div className={styles.gradeColumn}>
+                                            <h4 className={styles.columnTitle}>A</h4>
+                                            <p className={styles.scoreValue}>{totals.A ?? "—"}</p>
+                                        </div>
+                                        <div className={styles.gradeColumn}>
+                                            <h4 className={styles.columnTitle}>E</h4>
+                                            <p className={styles.scoreValue}>{totals.E ?? "—"}</p>
+                                        </div>
+                                        <div className={styles.gradeColumn}>
+                                            <h4 className={styles.columnTitle}>Итого</h4>
+                                            <p className={`${styles.scoreValue} ${styles.total}`}>
+                                                {totals.total ?? "—"}
+                                            </p>
                                         </div>
                                     </div>
                                 </td>
