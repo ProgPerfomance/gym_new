@@ -72,7 +72,7 @@ export default function TournamentApplicationPage() {
 
     setSubmitting(true);
     try {
-      const apiBase = "https://mvpgarage.one:2017"
+      const apiBase = "https://ketorry.ru:2017"
       const payload = {
         ...form,
         phone: form.phone.replace(/\s|\(|\)|-/g, ""),

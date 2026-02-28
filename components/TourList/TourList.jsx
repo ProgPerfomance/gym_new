@@ -10,7 +10,7 @@ const TourList = () => {
     useEffect(() => {
         const fetchTours = async () => {
             try {
-                const res = await axios.get('https://mvpgarage.one:2017/tournaments');
+                const res = await axios.get('https://ketorry.ru:2017/tournaments');
                 setTournaments(res.data);
             } catch (e) {
                 console.error('Ошибка при загрузке турниров', e);

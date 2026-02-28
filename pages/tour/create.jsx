@@ -14,7 +14,7 @@ const CreateTournament = () => {
         setLoading(true);
 
         try {
-            const res = await axios.post('https://mvpgarage.one:2017/tournaments/create', {
+            const res = await axios.post('https://ketorry.ru:2017/tournaments/create', {
                 name,
                 date,
             });

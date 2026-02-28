@@ -20,7 +20,7 @@ const JudgePage = () => {
     useEffect(() => {
         const fetchTours = async () => {
             try {
-                const res = await axios.get('https://mvpgarage.one:2017/tournaments');
+                const res = await axios.get('https://ketorry.ru:2017/tournaments');
                 setTournaments(res.data);
             } catch (e) {
                 console.error('Ошибка при загрузке турниров', e);
@@ -35,7 +35,7 @@ const JudgePage = () => {
         const fetchParticipants = async () => {
             try {
                 const res = await axios.get(
-                    `https://mvpgarage.one:2017/tournaments/${selectedTour}/participants`
+                    `https://ketorry.ru:2017/tournaments/${selectedTour}/participants`
                 );
                 setParticipants(res.data);
             } catch (e) {
@@ -49,7 +49,7 @@ const JudgePage = () => {
         if (!selectedParticipant || !judge) return;
 
         try {
-            await axios.post(`https://mvpgarage.one:2017/judge/set-score`, {
+            await axios.post(`https://ketorry.ru:2017/judge/set-score`, {
                 participantId: selectedParticipant._id.$oid || selectedParticipant._id,
                 judge,
                 score,
@@ -59,7 +59,7 @@ const JudgePage = () => {
 
             // обновляем список после сохранения
             const res = await axios.get(
-                `https://mvpgarage.one:2017/tournaments/${selectedTour}/participants`
+                `https://ketorry.ru:2017/tournaments/${selectedTour}/participants`
             );
             setParticipants(res.data);
 

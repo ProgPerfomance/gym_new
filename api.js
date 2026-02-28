@@ -2,7 +2,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-    baseURL: "https://mvpgarage.one:2017",
+    baseURL: "https://ketorry.ru:2017",
     // при необходимости: timeout: 10000,
 });
 

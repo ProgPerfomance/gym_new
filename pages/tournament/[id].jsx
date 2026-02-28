@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import styles from "./tournament.module.css";
 
-const API = "https://mvpgarage.one:2017";
+const API = "https://ketorry.ru:2017";
 
 const APPARATUSES = ["Булавы", "Обруч", "Без предмета", "Лента", "Скакалка", "Мяч"];
 const JUDGE_GROUPS = [
@@ -34,9 +34,13 @@ const TournamentPage = () => {
                     mentor: p.mentor || "",
                     city: p.city || "",
                     apparatus: p.apparatus || APPARATUSES[0],
-                    grades:
-                        p.grades ||
-                        JUDGE_GROUPS.flatMap((g) => g.list).reduce((acc, j) => ({ ...acc, [j]: null }), {}),
+                    grades: Object.fromEntries(
+                        Object.entries(
+                            p.grades ||
+                            JUDGE_GROUPS.flatMap((g) => g.list).reduce((acc, j) => ({ ...acc, [j]: null }), {})
+                        ).map(([k, v]) => [k, typeof v === "string" ? parseFloat(v) || null : v])
+                    ),
+
                     isNew: false,
                 }));
                 setParticipants(data);
@@ -126,32 +130,40 @@ const TournamentPage = () => {
     };
 
     const calculateTotals = (grades) => {
-        const safe = (n) => (typeof n === "number" && !isNaN(n) ? n : null);
-        const dw = safe(grades["ДВ-1"]),
-            dw2 = safe(grades["ДВ-2"]),
-            da1 = safe(grades["ДА-1"]),
-            da2 = safe(grades["ДА-2"]);
+        // Универсальный парсер
+        const toNumber = (n) => {
+            if (n === null || n === undefined || n === "") return 0;
+            const val = typeof n === "string" ? parseFloat(n) : n;
+            return isNaN(val) ? 0 : val;
+        };
 
-        const DВ = dw !== null && dw2 !== null ? (dw + dw2) / 2 : null;
-        const DА = da1 !== null && da2 !== null ? (da1 + da2) / 2 : null;
-        const D = DВ !== null && DА !== null ? (DВ + DА) / 2 : null;
+        const dw1 = toNumber(grades["ДВ-1"]);
+        const dw2 = toNumber(grades["ДВ-2"]);
+        const da1 = toNumber(grades["ДА-1"]);
+        const da2 = toNumber(grades["ДА-2"]);
 
-        const calcArt = (arr) => {
-            if (arr.length < 4) return null;
-            const sorted = [...arr].sort((a, b) => a - b);
+        const DВ = (dw1 + dw2) / 2;
+        const DА = (da1 + da2) / 2;
+        const D = (DВ + DА) / 2;
+
+        // Подсчёт по А и Е — с усреднением без пропусков
+        const calcArt = (keys) => {
+            const arr = keys.map((k) => toNumber(grades[k]));
+            const sorted = arr.sort((a, b) => a - b);
+            // если все нули — возвращаем 0
+            if (sorted.every((v) => v === 0)) return 0;
             const avg = (sorted[1] + sorted[2]) / 2;
             return +(10 - avg).toFixed(2);
         };
 
-        const getVals = (keys) => keys.map((k) => safe(grades[k])).filter((v) => v !== null);
-        const A = calcArt(getVals(["А-1", "А-2", "А-3", "А-4"]));
-        const E = calcArt(getVals(["Е-1", "Е-2", "Е-3", "Е-4"]));
+        const A = calcArt(["А-1", "А-2", "А-3", "А-4"]);
+        const E = calcArt(["Е-1", "Е-2", "Е-3", "Е-4"]);
 
-        const total =
-            D !== null && A !== null && E !== null ? +(D + A + E).toFixed(3) : null;
+        const total = +(D + A + E).toFixed(3);
 
         return { DВ, DА, D, A, E, total };
     };
+
 
     if (loading) return <div className={styles.container}>Загрузка...</div>;
 
